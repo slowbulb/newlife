@@ -60,6 +60,12 @@ export default function MapView({
     });
   }, []);
 
+  // Same reasoning as addOptimisticCapture: don't make placing/dragging a
+  // node wait on realtime to be reflected back into view.
+  const setLocalPosition = useCallback((id: string, x: number, y: number) => {
+    setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, x, y } : n)));
+  }, []);
+
   const upsertNode = useCallback((row: NodeRow) => {
     setNodes((prev) => {
       const idx = prev.findIndex((n) => n.id === row.id);
@@ -165,6 +171,7 @@ export default function MapView({
         edges={edges}
         placing={placing}
         onPlaced={() => setPlacing(null)}
+        onPositionChange={setLocalPosition}
         soloId={soloId}
         onOpenSolo={(id) => setSoloId(id || null)}
       />

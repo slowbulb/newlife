@@ -22,6 +22,7 @@ export default function Canvas({
   edges,
   placing,
   onPlaced,
+  onPositionChange,
   soloId,
   onOpenSolo,
 }: {
@@ -29,6 +30,7 @@ export default function Canvas({
   edges: EdgeRow[];
   placing: string | null;
   onPlaced: () => void;
+  onPositionChange: (id: string, x: number, y: number) => void;
   soloId: string | null;
   onOpenSolo: (id: string) => void;
 }) {
@@ -65,6 +67,7 @@ export default function Canvas({
   function onMouseDownBackground(e: React.MouseEvent) {
     if (placing) {
       const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      onPositionChange(placing, x, y); // local update first — don't wait on realtime to see it land
       updateNodePosition(placing, x, y);
       onPlaced();
       return;
@@ -105,13 +108,16 @@ export default function Canvas({
       const dy = (e.clientY - dragging.startY) / scale;
       const el = document.getElementById(`node-${dragging.id}`);
       if (el) el.style.transform = "";
-      updateNodePosition(dragging.id, dragging.nodeX + dx, dragging.nodeY + dy);
+      const nx = dragging.nodeX + dx;
+      const ny = dragging.nodeY + dy;
+      onPositionChange(dragging.id, nx, ny);
+      updateNodePosition(dragging.id, nx, ny);
     }
     setDragging(null);
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="relative z-0 h-full w-full overflow-hidden">
       <div className="absolute right-3 top-3 z-20 flex items-center gap-2 text-xs text-[var(--ink-dim)]">
         {soloId && (
           <button
@@ -136,7 +142,7 @@ export default function Canvas({
       </div>
 
       {placing && (
-        <div className="pointer-events-none absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-medium text-[#1a1400]">
+        <div className="pointer-events-none absolute left-1/2 top-24 z-20 -translate-x-1/2 rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-medium text-[#1a1400] shadow-lg">
           Click anywhere to place it
         </div>
       )}
