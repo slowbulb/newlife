@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0b0c0f;
+  --bg-elevated: #16181d;
+  --grid-line: #1f232b;
+  --ink: #e7e6e2;
+  --ink-dim: #8a8d96;
+  --accent: #f5c518;
+  --border: #2a2e37;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  overscroll-behavior: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: #1a1400;
+}
+
+.canvas-grid {
+  background-image: radial-gradient(var(--grid-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fade-in 180ms ease-out;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 197, 24, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(245, 197, 24, 0);
+  }
+}
+
+.glow {
+  animation: pulse-glow 2.2s ease-in-out infinite;
+}
+
+textarea,
+input {
+  font-family: inherit;
+}
