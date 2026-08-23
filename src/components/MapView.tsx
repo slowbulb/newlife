@@ -21,6 +21,45 @@ export default function MapView({
   const [soloId, setSoloId] = useState<string | null>(null);
   const [gutterCollapsed, setGutterCollapsed] = useState(false);
 
+  // Capture never blocks on the model, but the person typing still deserves
+  // to see it land — this doesn't wait for realtime (which requires a table
+  // to be added to the `supabase_realtime` publication; see
+  // supabase/migrations/0002_realtime.sql) at all.
+  const addOptimisticCapture = useCallback((nodeId: string, captureId: string, text: string) => {
+    const now = new Date().toISOString();
+    setNodes((prev) => {
+      if (prev.some((n) => n.id === nodeId)) return prev;
+      const stub: MapNode = {
+        id: nodeId,
+        type: "unsorted",
+        title: text.length > 140 ? text.slice(0, 140) + "…" : text,
+        body: text,
+        status: "unsorted",
+        terminal_form: null,
+        owner: null,
+        external_holder: null,
+        due_date: null,
+        irreversible: false,
+        cost_money: null,
+        cost_hours: null,
+        cost_exposure: null,
+        domain: null,
+        lane: null,
+        x: null,
+        y: null,
+        created_at: now,
+        updated_at: now,
+        last_touched_at: now,
+        stallCount: 0,
+        lastEventAt: now,
+        captureId,
+        pass1Label: null,
+        corrected: false,
+      };
+      return [...prev, stub];
+    });
+  }, []);
+
   const upsertNode = useCallback((row: NodeRow) => {
     setNodes((prev) => {
       const idx = prev.findIndex((n) => n.id === row.id);
@@ -129,7 +168,7 @@ export default function MapView({
         soloId={soloId}
         onOpenSolo={(id) => setSoloId(id || null)}
       />
-      <CaptureInput gutterOpen={!gutterCollapsed} />
+      <CaptureInput gutterOpen={!gutterCollapsed} onCaptured={addOptimisticCapture} />
       <Gutter
         nodes={gutter}
         onPlace={(id) => setPlacing(id)}
